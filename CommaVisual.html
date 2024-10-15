@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Musical Commas with Stacking Ratios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            margin: 20px auto;
+            padding: 15px;
+            max-width: 1000px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            padding: 8px;
+            margin: 10px;
+            font-size: 16px;
+            width: 200px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .stacked-visual {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+        }
+
+        .stationary-line {
+            width: 2px;
+            height: 180px;
+            background-color: black;
+            position: absolute;
+            left: 0;
+            top: 70px;
+            z-index: 2;
+        }
+
+        .line {
+            width: 1px;
+            height: 80px;
+            background-color: #007bff;
+            position: absolute;
+            bottom: 150px;
+            z-index: 1;
+        }
+
+        .line2 {
+            width: 1px;
+            height: 80px;
+            background-color: #dc3545;
+            position: absolute;
+            bottom: 50px;
+            z-index: 1;
+        }
+
+        .results {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .highlight {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Find Musical Commas by Stacking Ratios</h1>
+    <div class="container">
+        <p>Enter two Just Intonation ratios and see where they align (difference < 25 cents):</p>
+        <input type="text" id="ratio1" placeholder="Enter first ratio (e.g. 3/2)" />
+        <input type="text" id="ratio2" placeholder="Enter second ratio (e.g. 2/1)" />
+        <button onclick="startStacking()">Find the Comma</button>
+
+        <div class="stack-container">
+            <div class="stacked-visual" id="stacked-visual">
+                <!-- Stationary black line as the starting point -->
+                <div class="stationary-line"></div>
+            </div>
+        </div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        const centsThreshold = 25;  // Cents threshold to define a comma
+        const maxWidth = 1000;  // Max width for the animation
+        const animationDuration = 4;  // Total time for the final lines to appear in seconds
+
+        function parseRatio(ratioString) {
+            const [numerator, denominator] = ratioString.split("/").map(Number);
+            return numerator / denominator;
+        }
+
+        function ratioToCents(ratio) {
+            return 1200 * Math.log2(ratio);  // Convert ratio to cents
+        }
+
+        function findComma(ratio1, ratio2, maxIterations = 100) {
+            for (let n1 = 1; n1 <= maxIterations; n1++) {
+                for (let n2 = 1; n2 <= maxIterations; n2++) {
+                    const ratio1Stacked = Math.pow(ratio1, n1);
+                    const ratio2Stacked = Math.pow(ratio2, n2);
+                    const diffCents = Math.abs(ratioToCents(ratio1Stacked) - ratioToCents(ratio2Stacked));
+                    if (diffCents < centsThreshold) {
+                        return { n1, n2, diffCents: diffCents.toFixed(2) };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function startStacking() {
+            const ratio1String = document.getElementById("ratio1").value;
+            const ratio2String = document.getElementById("ratio2").value;
+
+            if (!ratio1String || !ratio2String) {
+                document.getElementById("results").innerHTML = "<p class='highlight'>Please enter two valid ratios!</p>";
+                return;
+            }
+
+            const ratio1 = parseRatio(ratio1String);
+            const ratio2 = parseRatio(ratio2String);
+
+            // Find where the comma is
+            const commaData = findComma(ratio1, ratio2);
+
+            if (commaData === null) {
+                document.getElementById("results").innerHTML = `<p class='highlight'>No comma found within 100 iterations for both ratios.</p>`;
+                return;
+            }
+
+            const { n1, n2, diffCents } = commaData;
+
+            // Clear previous visualization
+            const visualContainer = document.getElementById("stacked-visual");
+            visualContainer.innerHTML = ''; 
+
+            // Add the stationary black line
+            const stationaryLine = document.createElement("div");
+            stationaryLine.classList.add("stationary-line");
+            visualContainer.appendChild(stationaryLine);
+
+            const totalLines = Math.max(n1, n2);
+            const delayStep1 = (animationDuration / n1) * 1000;  // Delay for first ratio's lines
+            const delayStep2 = (animationDuration / n2) * 1000;  // Delay for second ratio's lines
+
+            for (let i = 1; i <= totalLines; i++) {
+                // First ratio (blue)
+                if (i <= n1) {
+                    const line1 = document.createElement("div");
+                    line1.classList.add("line");
+                    const leftPosition = (Math.log2(Math.pow(ratio1, i)) / Math.log2(Math.pow(ratio1, n1))) * maxWidth;
+                    line1.style.left = `${leftPosition}px`;
+
+                    // Add the delay for appearance
+                    setTimeout(() => {
+                        visualContainer.appendChild(line1);
+                    }, i * delayStep1);
+                }
+
+                // Second ratio (red)
+                if (i <= n2) {
+                    const line2 = document.createElement("div");
+                    line2.classList.add("line2");
+                    const leftPosition2 = (Math.log2(Math.pow(ratio2, i)) / Math.log2(Math.pow(ratio2, n2))) * maxWidth;
+                    line2.style.left = `${leftPosition2}px`;
+
+                    // Add the delay for appearance
+                    setTimeout(() => {
+                        visualContainer.appendChild(line2);
+                    }, i * delayStep2);
+                }
+            }
+
+            // Display the results
+            document.getElementById("results").innerHTML = `
+                <p>The comma was found after stacking interval 1 <strong>${n1}</strong> times and interval 2 <strong>${n2}</strong> times.</p>
+                <p>The difference at that point is <strong>${diffCents}</strong> cents.</p>
+            `;
+        }
+    </script>
+</body>
+</html>
