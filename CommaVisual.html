@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Musical Commas with Stacking Ratios</title>
+    <title>Simple Comma Visualizer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -96,7 +96,8 @@
     </style>
 </head>
 <body>
-    <h1>Find Musical Commas by Stacking Ratios</h1>
+    <h1>Simple Comma Visualizer</h1>
+    <h2>Made by Nick Vuci</h2>
     <div class="container">
         <p>Enter two Just Intonation ratios and see where they align (difference < 25 cents):</p>
         <input type="text" id="ratio1" placeholder="Enter first ratio (e.g. 3/2)" />
@@ -120,21 +121,49 @@
 
         function parseRatio(ratioString) {
             const [numerator, denominator] = ratioString.split("/").map(Number);
-            return numerator / denominator;
+            return { numerator, denominator };
         }
 
         function ratioToCents(ratio) {
             return 1200 * Math.log2(ratio);  // Convert ratio to cents
         }
 
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
         function findComma(ratio1, ratio2, maxIterations = 100) {
             for (let n1 = 1; n1 <= maxIterations; n1++) {
                 for (let n2 = 1; n2 <= maxIterations; n2++) {
-                    const ratio1Stacked = Math.pow(ratio1, n1);
-                    const ratio2Stacked = Math.pow(ratio2, n2);
-                    const diffCents = Math.abs(ratioToCents(ratio1Stacked) - ratioToCents(ratio2Stacked));
+                    const ratio1Stacked = {
+                        numerator: Math.pow(ratio1.numerator, n1),
+                        denominator: Math.pow(ratio1.denominator, n1)
+                    };
+                    const ratio2Stacked = {
+                        numerator: Math.pow(ratio2.numerator, n2),
+                        denominator: Math.pow(ratio2.denominator, n2)
+                    };
+
+                    const combinedNumerator = ratio1Stacked.numerator * ratio2Stacked.denominator;
+                    const combinedDenominator = ratio1Stacked.denominator * ratio2Stacked.numerator;
+                    const diffCents = Math.abs(ratioToCents(combinedNumerator / combinedDenominator));
+
                     if (diffCents < centsThreshold) {
-                        return { n1, n2, diffCents: diffCents.toFixed(2) };
+                        const commonDivisor = gcd(combinedNumerator, combinedDenominator);
+                        let simplifiedNumerator = combinedNumerator / commonDivisor;
+                        let simplifiedDenominator = combinedDenominator / commonDivisor;
+
+                        // Ensure the numerator is greater than the denominator
+                        if (simplifiedNumerator < simplifiedDenominator) {
+                            [simplifiedNumerator, simplifiedDenominator] = [simplifiedDenominator, simplifiedNumerator];
+                        }
+
+                        return {
+                            n1,
+                            n2,
+                            diffCents: diffCents.toFixed(2),
+                            commaRatio: `${simplifiedNumerator}/${simplifiedDenominator}`
+                        };
                     }
                 }
             }
@@ -161,7 +190,7 @@
                 return;
             }
 
-            const { n1, n2, diffCents } = commaData;
+            const { n1, n2, diffCents, commaRatio } = commaData;
 
             // Clear previous visualization
             const visualContainer = document.getElementById("stacked-visual");
@@ -181,7 +210,7 @@
                 if (i <= n1) {
                     const line1 = document.createElement("div");
                     line1.classList.add("line");
-                    const leftPosition = (Math.log2(Math.pow(ratio1, i)) / Math.log2(Math.pow(ratio1, n1))) * maxWidth;
+                    const leftPosition = (Math.log2(Math.pow(ratio1.numerator / ratio1.denominator, i)) / Math.log2(Math.pow(ratio1.numerator / ratio1.denominator, n1))) * maxWidth;
                     line1.style.left = `${leftPosition}px`;
 
                     // Add the delay for appearance
@@ -194,7 +223,7 @@
                 if (i <= n2) {
                     const line2 = document.createElement("div");
                     line2.classList.add("line2");
-                    const leftPosition2 = (Math.log2(Math.pow(ratio2, i)) / Math.log2(Math.pow(ratio2, n2))) * maxWidth;
+                    const leftPosition2 = (Math.log2(Math.pow(ratio2.numerator / ratio2.denominator, i)) / Math.log2(Math.pow(ratio2.numerator / ratio2.denominator, n2))) * maxWidth;
                     line2.style.left = `${leftPosition2}px`;
 
                     // Add the delay for appearance
@@ -206,9 +235,8 @@
 
             // Display the results
             document.getElementById("results").innerHTML = `
-                <p>The comma was found after stacking interval 1 <strong>${n1}</strong> times and interval 2 <strong>${n2}</strong> times.</p>
-                <p>The difference at that point is <strong>${diffCents}</strong> cents.</p>
-            `;
+                <p>The comma was found after stacking ratio <strong>${ratio1String}</strong> <strong>${n1}</strong> times and ratio <strong>${ratio2String}</strong> <strong>${n2}</strong> times.</p>
+                <p>The difference at that point is <strong>${diffCents}</strong> cents, which equals the ratio <strong>${commaRatio}</strong>.</p>`;
         }
     </script>
 </body>
