@@ -162,9 +162,11 @@
     <h1>Simple Comma Visualizer</h1>
     <h2>Made by Nick Vuci</h2>
     <div class="explanation">
-        <h3>What is a Musical Comma?</h3>
-        <p>A <strong>musical comma</strong> is a small interval that arises from the discrepancy between different tuning systems in just intonation. It is the difference between two intervals that are theoretically the same but derived through different stacking of ratios. For example, stacking twelve perfect fifths (ratio 3/2) and comparing it to seven octaves (ratio 2/1) yields a small difference known as the Pythagorean comma.</p>
-        <p>This tool allows you to explore such discrepancies by entering two different ratios, stacking them, and visually seeing where they align.</p>
+        <h3 onclick="toggleExplanation()" style="cursor: pointer;">What is a Musical Comma?</h3>
+        <div id="explanation-text" style="max-height: 0; overflow: hidden; transition: max-height 0.5s ease-out;">
+            <p>A <strong>musical comma</strong> is a small interval that arises from the discrepancy between different tuning systems in just intonation. It is the difference between two intervals that are theoretically the same but derived through different stacking of ratios. For example, stacking twelve perfect fifths (ratio 3/2) and comparing it to seven octaves (ratio 2/1) yields a small difference known as the Pythagorean comma.</p>
+            <p>This tool allows you to explore such discrepancies by entering two different ratios, stacking them, and visually seeing where they align.</p>
+        </div>
     </div>
 
     <div class="container">
@@ -347,5 +349,22 @@
             }, 500);
         }
     </script>
+    <script>
+        function toggleExplanation() {
+            const explanationText = document.getElementById('explanation-text');
+            if (explanationText.style.maxHeight === '0px' || explanationText.style.maxHeight === '') {
+                explanationText.style.maxHeight = explanationText.scrollHeight + 'px';
+            } else {
+                explanationText.style.maxHeight = '0';
+            }
+        }
+    </script>
+    <style>
+        #explanation-text {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+    </style>
 </body>
 </html>
