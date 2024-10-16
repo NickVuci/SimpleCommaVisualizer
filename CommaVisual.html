@@ -85,6 +85,10 @@
             z-index: 1;
         }
 
+        .matching-point {
+            background-color: #32cd32 !important;
+        }
+
         .results {
             margin-top: 20px;
             font-size: 18px;
@@ -94,7 +98,8 @@
             color: #dc3545;
             font-weight: bold;
         }
-            .dark-mode {
+
+        .dark-mode {
             background-color: #121212;
             color: #ffffff;
         }
@@ -138,10 +143,22 @@
         .dark-mode .explanation {
             background-color: #2c2c2c;
         }
+            .highlight {
+            animation: highlight-animation 1s infinite alternate;
+        }
+
+        @keyframes highlight-animation {
+            0% {
+                background-color: yellow;
+            }
+            100% {
+                background-color: orange;
+            }
+        }
     </style>
 </head>
-<body>
-    <button onclick="toggleDarkMode()" style="position: fixed; top: 10px; right: 10px;">Toggle Dark Mode</button>
+<body class="dark-mode">
+    <button onclick="toggleDarkMode()" style="position: fixed; top: 10px; right: 10px;">Toggle Light Mode</button>
     <h1>Simple Comma Visualizer</h1>
     <h2>Made by Nick Vuci</h2>
     <div class="explanation">
@@ -276,6 +293,10 @@
                     // Add the delay for appearance
                     setTimeout(() => {
                         visualContainer.appendChild(line1);
+                        if (i === n1) {
+                            line1.classList.add('highlight');
+                            highlightMatchingPoint(line1);
+                        }
                         if (i === totalLines) {
                             isAnimating = false;
                         }
@@ -292,6 +313,10 @@
                     // Add the delay for appearance
                     setTimeout(() => {
                         visualContainer.appendChild(line2);
+                        if (i === n2) {
+                            line2.classList.add('highlight');
+                            highlightMatchingPoint(line2);
+                        }
                         if (i === totalLines) {
                             isAnimating = false;
                         }
@@ -305,15 +330,21 @@
                 <p>The difference at that point is <strong>${diffCents}</strong> cents, which equals the ratio <strong>${commaRatio}</strong>.</p>`;
         }
 
-        function checkAnimationComplete(n1, n2, i) {
-            if (i === Math.max(n1, n2)) {
-                isAnimating = false;
-            }
-        }
-    </script>
-    <script>
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
+            const button = document.querySelector('button[onclick="toggleDarkMode()"]');
+            if (document.body.classList.contains('dark-mode')) {
+                button.textContent = 'Toggle Light Mode';
+            } else {
+                button.textContent = 'Toggle Dark Mode';
+            }
+        }
+            function highlightMatchingPoint(line) {
+            line.style.transition = 'transform 0.5s ease-in-out';
+            line.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                line.style.transform = 'scale(1)';
+            }, 500);
         }
     </script>
 </body>
