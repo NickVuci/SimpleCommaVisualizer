@@ -170,12 +170,19 @@
             return null;
         }
 
+        let isAnimating = false;
+
         function startStacking() {
+            if (isAnimating) {
+                return;
+            }
+            isAnimating = true;
             const ratio1String = document.getElementById("ratio1").value;
             const ratio2String = document.getElementById("ratio2").value;
 
             if (!ratio1String || !ratio2String) {
                 document.getElementById("results").innerHTML = "<p class='highlight'>Please enter two valid ratios!</p>";
+                isAnimating = false;
                 return;
             }
 
@@ -187,6 +194,7 @@
 
             if (commaData === null) {
                 document.getElementById("results").innerHTML = `<p class='highlight'>No comma found within 100 iterations for both ratios.</p>`;
+                isAnimating = false;
                 return;
             }
 
@@ -216,6 +224,9 @@
                     // Add the delay for appearance
                     setTimeout(() => {
                         visualContainer.appendChild(line1);
+                        if (i === totalLines) {
+                            isAnimating = false;
+                        }
                     }, i * delayStep1);
                 }
 
@@ -229,6 +240,9 @@
                     // Add the delay for appearance
                     setTimeout(() => {
                         visualContainer.appendChild(line2);
+                        if (i === totalLines) {
+                            isAnimating = false;
+                        }
                     }, i * delayStep2);
                 }
             }
@@ -237,6 +251,12 @@
             document.getElementById("results").innerHTML = `
                 <p>The comma was found after stacking ratio <strong>${ratio1String}</strong> <strong>${n1}</strong> times and ratio <strong>${ratio2String}</strong> <strong>${n2}</strong> times.</p>
                 <p>The difference at that point is <strong>${diffCents}</strong> cents, which equals the ratio <strong>${commaRatio}</strong>.</p>`;
+        }
+
+        function checkAnimationComplete(n1, n2, i) {
+            if (i === Math.max(n1, n2)) {
+                isAnimating = false;
+            }
         }
     </script>
 </body>
