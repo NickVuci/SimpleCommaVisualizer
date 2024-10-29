@@ -1,0 +1,41 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Comma Visualizer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0z4JcG7uj6C0qP+/Jr8ABST4e1RvXK6M7u2GRUOXFQ0kT8" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-mode">
+    <button onclick="toggleDarkMode()" style="position: fixed; top: 10px; right: 10px;">Toggle Light Mode</button>
+    <h1>Simple Comma Visualizer</h1>
+    <h2>Made by Nick Vuci</h2>
+    <div class="explanation">
+        <h3 onclick="toggleExplanation()" style="cursor: pointer;">What is a Musical Comma?</h3>
+        <div id="explanation-text">
+            <p>A <strong>musical comma</strong> is a small interval that arises from the discrepancy between different tuning systems in just intonation. It is the difference between two intervals that are theoretically the same but derived through different stacking of ratios. For example, stacking twelve perfect fifths (ratio 3/2) and comparing it to seven octaves (ratio 2/1) yields a small difference known as the Pythagorean comma.</p>
+            <p>This tool allows you to explore such discrepancies by entering two different ratios, stacking them, and visually seeing where they align.</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <p>Enter two Just Intonation ratios and see where they align (difference < 25 cents):</p>
+        <input type="text" id="ratio1" placeholder="Enter first ratio (e.g. 3/2)" />
+        <input type="text" id="ratio2" placeholder="Enter second ratio (e.g. 2/1)" />
+        <button onclick="startStacking()">Find the Comma</button>
+
+        <div class="stack-container">
+            <div class="stacked-visual" id="stacked-visual">
+                <!-- Stationary black line as the starting point -->
+                <div class="stationary-line"></div>
+            </div>
+        </div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
